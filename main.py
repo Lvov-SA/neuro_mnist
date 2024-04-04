@@ -1,11 +1,63 @@
-import NeuralNetwork
+from NeuralNetwork import NeuralNetwork
+import matplotlib
+import matplotlib.pyplot
+import numpy
 
-net = NeuralNetwork(2,3,3,0.1)
-for a in range(1000):
-    net.train([1.8,0.5],[0.9,0.1,0.1])
-    net.train([0.1,1],[0.1,0.9,0.1])
-    net.train([1,0.7],[0.1,0.1,0.9])
 
-print("Для человека с данными 175, 65 результат будет", net.query([1.8,0.5]))
-print("Для человека с данными 160, 100 результат будет", net.query([0.1,1]))
-print("Для человека с данными 180, 70 результат будет", net.query([1,0.7]))
+# dataFile = open("data/mnist_train_100.csv")
+# dataList = dataFile.readlines()
+# dataFile.close()
+
+# allValues = dataList[0].split(',')
+# imageArray = numpy.asfarray(allValues[1:]).reshape((28,28))
+
+# matplotlib.pyplot.imshow(imageArray,cmap='Greys',interpolation='None')
+# matplotlib.pyplot.show()
+
+# slisedInput = (numpy.asfarray(allValues[1:]) / 255.0 * 0.99) + 0.01
+
+# onodes=10
+# targets = numpy.zeros(onodes) + 0.01
+# targets[int(allValues[0])] = 0.99
+
+def getKey(array, max):
+    k = 0
+    for a in array:
+        if a == max:
+            return k
+        k+=1
+
+inputNodes = 784
+hiddenNodes = 100
+outputNodes = 10
+
+learningRate = 0.3
+net = NeuralNetwork(inputNodes,hiddenNodes,outputNodes,learningRate)
+
+dataFile = open("data/mnist_train_100.csv")
+trainingDataList = dataFile.readlines()
+dataFile.close()
+
+for record in trainingDataList:
+    allValues = record.split(',')
+    slisedInput = (numpy.asfarray(allValues[1:]) / 255.0 * 0.99) + 0.01
+    targets = numpy.zeros(outputNodes) + 0.01
+    targets[int(allValues[0])] = 0.99
+    net.train(slisedInput, targets)
+
+dataFile = open("data/mnist_test_10.csv")
+testDataSet = dataFile.readlines()
+dataFile.close()
+
+for record in testDataSet:
+    allValues = record.split(',')
+    print("Маркер:")
+    print(allValues[0])
+    imageArray = numpy.asfarray(allValues[1:]).reshape((28,28))
+
+    matplotlib.pyplot.imshow(imageArray,cmap='Greys',interpolation='None')
+    matplotlib.pyplot.show()
+    slisedInput = (numpy.asfarray(allValues[1:]) / 255.0 * 0.99) + 0.01
+    print("Результат работы сети:")
+    res = net.query(slisedInput)
+    print(getKey(res,max(res)))
